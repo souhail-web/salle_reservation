@@ -1,9 +1,23 @@
 <?php
 session_start();
 
+$redirect = $_GET['redirect'] ?? '';
+$safe_redirect = '';
+
+if (is_string($redirect) && $redirect !== '') {
+    $redirect = ltrim($redirect);
+    $is_external = preg_match('~^(?:[a-z][a-z0-9+.-]*:)?//~i', $redirect) === 1;
+    $has_traversal = strpos($redirect, '..') !== false;
+    $is_rooted = isset($redirect[0]) && $redirect[0] === '/';
+
+    if (!$is_external && !$has_traversal && !$is_rooted) {
+        $safe_redirect = $redirect;
+    }
+}
+
 // Redirection si déjà connecté
 if (isset($_SESSION['user_id'])) {
-    header('Location: ' . ($_SESSION['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php'));
+    header('Location: ' . ($safe_redirect !== '' ? $safe_redirect : ($_SESSION['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php')));
     exit();
 }
 
@@ -33,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['role'] = $user['role'];
                     
                     // Redirection vers le tableau de bord approprié
-                    header('Location: ' . ($user['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php'));
+                    header('Location: ' . ($safe_redirect !== '' ? $safe_redirect : ($user['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php')));
                     exit();
                 }
             }

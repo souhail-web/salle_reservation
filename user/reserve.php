@@ -9,10 +9,22 @@ redirectIfNotLoggedIn();
 $error = '';
 $success = '';
 
+$preselected_room_id = isset($_GET['room_id']) ? intval($_GET['room_id']) : 0;
+$preselected_room_name = isset($_GET['room']) ? trim((string)$_GET['room']) : '';
+
 // Fetch all rooms
 try {
     $stmt = $pdo->query("SELECT * FROM rooms ORDER BY name");
     $rooms = $stmt->fetchAll();
+
+    if ($preselected_room_id <= 0 && $preselected_room_name !== '') {
+        foreach ($rooms as $r) {
+            if (isset($r['name']) && strcasecmp((string)$r['name'], $preselected_room_name) === 0) {
+                $preselected_room_id = (int)$r['id'];
+                break;
+            }
+        }
+    }
 } catch (PDOException $e) {
     $error = "Erreur lors du chargement des salles.";
 }
@@ -50,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("INSERT INTO reservations (user_id, room_id, reservation_date, start_time, end_time, purpose) 
                                       VALUES (?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$_SESSION['user_id'], $room_id, $reservation_date, $start_time, $end_time, $purpose]);
-                $success = 'Réservation effectuée avec succès!';
+                $_SESSION['message'] = 'Réservation effectuée avec succès!';
+                header('Location: dashboard.php');
+                exit();
             }
         } catch (PDOException $e) {
             $error = 'Erreur lors de la réservation.';
@@ -123,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select class="form-select" id="room_id" name="room_id" required>
                             <option value="">Sélectionnez une salle</option>
                             <?php foreach ($rooms as $room): ?>
-                            <option value="<?php echo $room['id']; ?>">
+                            <option value="<?php echo $room['id']; ?>" <?php echo ($preselected_room_id === (int)$room['id']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($room['name']); ?> 
                                 (<?php echo $room['capacity']; ?> personnes)
                             </option>

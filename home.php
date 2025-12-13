@@ -3,63 +3,57 @@ $pageTitle = 'Accueil';
 require_once 'config/db.php';
 require_once 'includes/header.php';
 
-// Exemple de données de salles
-$rooms = [
-    [ 
-        'id' => 1,
-        'name' => 'Salle de conférence VIP',
-        'description' => 'Espace haut de gamme avec écran tactile 4K, système audio professionnel et sièges en cuir pour des réunions d\'exception.',
-        'price' => 299.99,
-        'capacity' => 20,
-        'image' => 'assets/images/a.jfif',
-        'features' => ['Écran tactile 4K', 'Système audio premium', 'Climatisation silencieuse', 'Wifi fibre']
-    ],
-    [
-        'id' => 2,
-        'name' => 'Salle de réunion standard',
-        'description' => 'Espace fonctionnel et modulable, idéal pour les réunions d\'équipe et les ateliers collaboratifs quotidiens.',
-        'price' => 149.99,
-        'capacity' => 10,
-        'image' => 'assets/images/bjfif.jfif',
-        'features' => ['Écran 65"', 'Tableau blanc interactif', 'Climatisation', 'Wifi']
-    ],
-    [
-        'id' => 3,
-        'name' => 'Espace créatif',
-        'description' => 'Environnement lumineux et inspirant avec mobilier design pour stimuler la créativité lors de vos ateliers.',
-        'price' => 199.99,
-        'capacity' => 15,
-        'image' => 'assets/images/c.jfif',
-        'features' => ['Murs effaçables', 'Mobilier design', 'Éclairage LED', 'Wifi']
-    ],
-    [
-        'id' => 4,
-        'name' => 'Salle de formation',
-        'description' => 'Espace éducatif équipé pour des formations professionnelles avec des équipements pédagogiques de pointe.',
-        'price' => 179.99,
-        'capacity' => 25,
-        'image' => 'assets/images/d.jfif',
-        'features' => ['Écran de projection', 'Tables individuelles', 'Climatisation', 'Wifi']
-    ],
-    [
-        'id' => 5,
-        'name' => 'Salle de conférence panoramique',
-        'description' => 'Vue imprenable avec une baie vitrée, parfaite pour impressionner vos clients lors de réunions importantes.',
-        'price' => 349.99,
-        'capacity' => 30,
-        'image' => 'assets/images/e.jfif',
-        'features' => ['Vue panoramique', 'Système vidéo 4K', 'Service traiteur', 'Wifi']
-    ],
-    [
-        'id' => 6,
-        'name' => 'Espace coworking',
-        'description' => 'Espace de travail partagé avec postes de travail ergonomiques et zones de détente pour plus de convivialité.',
-        'price' => 99.99,
-        'capacity' => 40,
-        'image' => 'assets/images/fjfif.jfif',
-        'features' => ['Bureaux partagés', 'Espace détente', 'Café illimité', 'Wifi']
-    ]
+$rooms = [];
+$rooms_error = '';
+
+$fallback_images = [
+    'assets/images/a.jfif',
+    'assets/images/bjfif.jfif',
+    'assets/images/c.jfif',
+    'assets/images/d.jfif',
+    'assets/images/e.jfif',
+    'assets/images/fjfif.jfif',
 ];
+
+try {
+    $stmt = $pdo->query("SELECT * FROM rooms ORDER BY name");
+    $db_rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($db_rooms as $r) {
+        $id = (int)($r['id'] ?? 0);
+        $name = (string)($r['name'] ?? '');
+        $capacity = (int)($r['capacity'] ?? 0);
+        $equipment = (string)($r['equipment'] ?? '');
+
+        $features = array_values(array_filter(array_map('trim', explode(',', $equipment))));
+        if (count($features) === 0) {
+            $features = ['Wifi', 'Climatisation'];
+        }
+
+        if ($capacity >= 80) {
+            $description = 'Grand espace adapté aux conférences et présentations, avec des équipements pour vos événements.';
+        } elseif ($capacity >= 25) {
+            $description = 'Salle spacieuse idéale pour des réunions d\'équipe, formations et ateliers collaboratifs.';
+        } else {
+            $description = 'Salle confortable pour vos réunions et rendez-vous professionnels.';
+        }
+
+        $price = round(49.99 + max(0, $capacity) * 5, 2);
+        $image = $fallback_images[(int)($id % max(1, count($fallback_images)))];
+
+        $rooms[] = [
+            'id' => $id,
+            'name' => $name,
+            'description' => $description,
+            'price' => $price,
+            'capacity' => $capacity,
+            'image' => $image,
+            'features' => $features,
+        ];
+    }
+} catch (PDOException $e) {
+    $rooms_error = 'Erreur lors du chargement des salles.';
+}
 ?>
 
 <style>
@@ -617,11 +611,23 @@ body {
             <p class="text-gray-600 max-w-2xl mx-auto text-lg">Chaque espace est pensé pour optimiser la productivité et stimuler la créativité</p>
         </div>
 
+        <?php if ($rooms_error): ?>
+            <div class="max-w-2xl mx-auto text-center bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Impossible de charger les salles</h3>
+                <p class="text-gray-600 mb-0"><?php echo htmlspecialchars($rooms_error); ?></p>
+            </div>
+        <?php elseif (!isset($rooms) || count($rooms) === 0): ?>
+            <div class="max-w-2xl mx-auto text-center bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucune salle disponible</h3>
+                <p class="text-gray-600 mb-0">Ajoutez des salles depuis l'espace admin pour commencer.</p>
+            </div>
+        <?php else: ?>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             <?php foreach ($rooms as $index => $room): ?>
                 <div class="room-card hover-lift shadow-lg hover:shadow-2xl group"
                      style="animation-delay: <?php echo $index * 0.1; ?>s">
-                    <div class="relative h-64 overflow-hidden rounded-t-xl">
+                    <a href="room.php?id=<?php echo (int)$room['id']; ?>" class="block relative h-64 overflow-hidden rounded-t-xl">
                         <div class="image-loading"></div>
                         <div class="image-container">
                             <img src="<?php echo htmlspecialchars($room['image']); ?>" 
@@ -655,20 +661,22 @@ body {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                     
                     <div class="p-6 flex flex-col flex-grow">
                         <div class="mb-4">
-                            <h3 class="text-gray-900 text-xl font-bold mb-3 group-hover:text-blue-600 transition-colors">
-                                <?php echo htmlspecialchars($room['name']); ?>
-                            </h3>
+                            <a href="room.php?id=<?php echo (int)$room['id']; ?>" class="block">
+                                <h3 class="text-gray-900 text-xl font-bold mb-3 group-hover:text-blue-600 transition-colors">
+                                    <?php echo htmlspecialchars($room['name']); ?>
+                                </h3>
+                            </a>
                             <p class="text-gray-600 leading-relaxed line-clamp-3">
                                 <?php echo htmlspecialchars($room['description']); ?>
                             </p>
                         </div>
                         
                         <div class="mt-auto pt-4">
-                            <a href="<?php echo isset($_SESSION['user_id']) ? 'user/reserve.php?room_id=' . $room['id'] : 'register.php'; ?>" 
+                            <a href="room.php?id=<?php echo (int)$room['id']; ?>&reserve=1" 
                                class="btn-primary w-full text-center flex items-center justify-center group/btn">
                                 <svg class="w-5 h-5 mr-3 transform group-hover/btn:rotate-12 transition-transform" 
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -681,6 +689,8 @@ body {
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <?php endif; ?>
         
         <!-- Call to action pour plus d'espaces -->
         <div class="mt-16 text-center animate-fade-in-up" style="animation-delay: 0.6s">
