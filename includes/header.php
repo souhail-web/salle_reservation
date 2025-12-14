@@ -133,43 +133,53 @@ $prefix = $is_subdir ? '../' : '';
                                 <div class="relative group">
                                     <div class="flex items-center">
                                         <button type="button" 
-                                                class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+                                                class="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 group" 
                                                 id="user-menu-button" 
                                                 aria-expanded="false" 
                                                 aria-haspopup="true">
                                             <span class="sr-only">Ouvrir le menu utilisateur</span>
-                                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold">
-                                                <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)); ?>
+                                            <div class="flex items-center">
+                                                <div class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold transition-all duration-200 group-hover:bg-blue-600 group-hover:text-white">
+                                                    <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)); ?>
+                                                </div>
+                                                <span class="ml-2 text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors duration-200 hidden md:inline-flex items-center">
+                                                    <?php echo htmlspecialchars($_SESSION['username'] ?? 'Utilisateur'); ?>
+                                                    <svg class="ml-1 -mr-1 h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </span>
                                             </div>
                                         </button>
                                     </div>
-                                    <!-- Menu déroulant avec un conteneur pour le padding -->
-                                    <div class="pt-2 absolute right-0">
+                                    <!-- Menu déroulant amélioré -->
+                                    <div class="absolute right-0 mt-2 w-56 origin-top-right z-50">
                                         <div id="user-menu" 
-                                             class="w-56 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-1 group-hover:translate-y-0" 
+                                             class="rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 py-1" 
                                              role="menu" 
                                              aria-orientation="vertical" 
-                                             tabindex="-1">
+                                             tabindex="-1"
+                                             style="min-width: 14rem;"
+                                             data-dropdown-placement="bottom-end">
                                             <a href="<?php echo $prefix . ($_SESSION['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php'); ?>" 
-                                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
+                                               class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150" 
                                                role="menuitem" 
                                                tabindex="-1">
-                                                <svg class="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                                <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                                                 </svg>
                                                 Tableau de bord
                                             </a>
                                             <a href="<?php echo $prefix; ?>user/profile.php" 
-                                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
+                                               class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150" 
                                                role="menuitem" 
                                                tabindex="-1">
-                                                <svg class="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                <svg class="w-5 h-5 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                                 Mon profil
                                             </a>
                                             <a href="<?php echo $prefix; ?>logout.php" 
-                                               class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" 
+                                               class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150" 
                                                role="menuitem" 
                                                tabindex="-1">
                                                 <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

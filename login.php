@@ -1,4 +1,8 @@
 <?php
+// Activer l'affichage des erreurs pour le débogage
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 $redirect = $_GET['redirect'] ?? '';
@@ -39,21 +43,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
             $stmt->execute([$username]);
             
-            if ($user = $stmt->fetch()) {
+            if ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 if (password_verify($password, $user['password'])) {
+                    // Vérification supplémentaire du mot de passe haché si nécessaire
+                    if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+                        $newHash = password_hash($password, PASSWORD_DEFAULT);
+                        $updateStmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                        $updateStmt->execute([$newHash, $user['id']]);
+                    }
+                    
                     // Authentification réussie
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
-                    $_SESSION['role'] = $user['role'];
+                    // S'assurer que le rôle est en minuscules pour éviter les problèmes de casse
+                    $_SESSION['role'] = strtolower($user['role']);
                     
-                    // Redirection vers le tableau de bord approprié
-                    header('Location: ' . ($safe_redirect !== '' ? $safe_redirect : ($user['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php')));
+                    // Journalisation pour le débogage
+                    error_log("Connexion réussie - Utilisateur: " . $user['username'] . ", Rôle: " . $_SESSION['role']);
+                    
+                    // Déterminer la page de destination
+                    $redirectUrl = $safe_redirect !== '' ? $safe_redirect : 
+                                 ($_SESSION['role'] === 'admin' ? 'admin/dashboard.php' : 'user/dashboard.php');
+                    
+                    // Journalisation de la redirection
+                    error_log("Redirection vers: " . $redirectUrl);
+                    
+                    // Redirection avec en-têtes pour éviter la mise en cache
+                    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                    header("Cache-Control: post-check=0, pre-check=0", false);
+                    header("Pragma: no-cache");
+                    header("Location: " . $redirectUrl);
                     exit();
+                } else {
+                    // Journalisation des tentatives de connexion échouées
+                    error_log("Échec de la connexion - Mot de passe incorrect pour l'utilisateur: " . $username);
+                    $error = 'Nom d\'utilisateur ou mot de passe incorrect';
                 }
+            } else {
+                // Journalisation des tentatives de connexion avec un utilisateur inexistant
+                error_log("Échec de la connexion - Utilisateur non trouvé: " . $username);
+                $error = 'Nom d\'utilisateur ou mot de passe incorrect';
             }
-            
-            // Si on arrive ici, l'authentification a échoué
-            $error = 'Identifiants invalides';
             
         } catch (PDOException $e) {
             $error = 'Une erreur est survenue. Veuillez réessayer.';

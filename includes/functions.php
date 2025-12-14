@@ -6,7 +6,8 @@ function isLoggedIn() {
 }
 
 function isAdmin() {
-    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+    // Vérifie si le rôle est défini et si c'est 'admin' (insensible à la casse)
+    return isset($_SESSION['role']) && strtolower($_SESSION['role']) === 'admin';
 }
 
 function redirectIfNotLoggedIn() {

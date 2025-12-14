@@ -543,7 +543,7 @@ body {
                 </div>
                 <div class="relative">
                     <div class="absolute -inset-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div class="relative p-7 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                    <div class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:shadow-2xl">
                         <div class="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-blue-100 to-white p-3.5 shadow-lg group-hover:shadow-xl transition-shadow">
                             <svg class="w-full h-full text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -564,7 +564,7 @@ body {
                 </div>
                 <div class="relative">
                     <div class="absolute -inset-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div class="relative p-7 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                    <div class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:shadow-2xl">
                         <div class="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-blue-100 to-white p-3.5 shadow-lg group-hover:shadow-xl transition-shadow">
                             <svg class="w-full h-full text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 11-4 0 2 2 0 014 0zM9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -585,7 +585,7 @@ body {
                 </div>
                 <div class="relative">
                     <div class="absolute -inset-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div class="relative p-7 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                    <div class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:shadow-2xl">
                         <div class="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-blue-100 to-white p-3.5 shadow-lg group-hover:shadow-xl transition-shadow">
                             <svg class="w-full h-full text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path>
@@ -603,7 +603,7 @@ body {
 </section>
 
 <!-- Nos salles -->
-<section id="salles" class="py-20 relative overflow-hidden">
+<section id="salles" class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden border border-white/20 transition-all duration-300 hover:shadow-2xl">
     <div class="container mx-auto px-4">
         <div class="text-center mb-16">
             <span class="inline-block text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">NOS ESPACES PREMIUM</span>
@@ -611,7 +611,9 @@ body {
                 Des lieux qui <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">inspirent</span>
             </h2>
             <div class="section-title"></div>
-            <p class="text-gray-600 max-w-2xl mx-auto text-lg">Chaque espace est pensé pour optimiser la productivité et stimuler la créativité</p>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                Chaque espace est pensé pour optimiser la productivité et stimuler la créativité
+            </p>
         </div>
 
         <?php if ($rooms_error): ?>
