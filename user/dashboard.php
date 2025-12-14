@@ -1,5 +1,6 @@
 <?php
 session_start();
+$pageTitle = 'Tableau de bord';
 require_once '../config/db.php';
 require_once '../includes/functions.php';
 
@@ -31,394 +32,231 @@ try {
 } catch (PDOException $e) {
     $error = "Erreur lors du chargement de vos réservations.";
 }
+
+require_once '../includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de bord - Réservation de Salles</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --accent: #8b5cf6;
-            --text: #0f172a;
-            --muted: #64748b;
-            --card-radius: 18px;
-        }
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Bienvenue, <?php echo htmlspecialchars($_SESSION['username']); ?></h1>
+        <p class="text-gray-600">Gérez vos réservations et planifiez vos prochaines réunions.</p>
+    </div>
 
-        body {
-            min-height: 100vh;
-            background:
-                radial-gradient(1200px 520px at 10% 10%, rgba(37, 99, 235, 0.18), transparent 60%),
-                radial-gradient(980px 520px at 90% 25%, rgba(139, 92, 246, 0.18), transparent 55%),
-                linear-gradient(180deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
-            color: var(--text);
-        }
-
-        .dashboard-shell {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .navbar-glass {
-            background: rgba(255, 255, 255, 0.78) !important;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(2, 6, 23, 0.08);
-        }
-
-        .navbar-glass .navbar-brand {
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            color: var(--text) !important;
-        }
-
-        .nav-pill {
-            border-radius: 999px;
-            padding: 0.55rem 0.9rem;
-            color: #0f172a !important;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .nav-pill:hover {
-            background: rgba(37, 99, 235, 0.08);
-            transform: translateY(-1px);
-        }
-
-        .nav-pill.active {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(139, 92, 246, 0.12));
-            font-weight: 700;
-        }
-
-        .hero {
-            border-radius: var(--card-radius);
-            background:
-                radial-gradient(900px 260px at 15% 20%, rgba(37, 99, 235, 0.18), transparent 60%),
-                radial-gradient(800px 260px at 80% 10%, rgba(139, 92, 246, 0.18), transparent 55%),
-                linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.9));
-            border: 1px solid rgba(2, 6, 23, 0.06);
-            box-shadow: 0 20px 55px rgba(2, 6, 23, 0.10);
-            overflow: hidden;
-        }
-
-        .hero .hero-title {
-            font-weight: 900;
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0.75rem;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.04);
-            border: 1px solid rgba(2, 6, 23, 0.06);
-            color: #0f172a;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .e-card {
-            border: 1px solid rgba(2, 6, 23, 0.08);
-            border-radius: var(--card-radius);
-            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.08);
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.92);
-        }
-
-        .e-card .card-header {
-            background: transparent;
-            border-bottom: 1px solid rgba(2, 6, 23, 0.06);
-            padding: 1rem 1.25rem;
-        }
-
-        .e-card .card-body {
-            padding: 1.25rem;
-        }
-
-        .btn-gradient {
-            border: none;
-            color: #fff !important;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
-            border-radius: 12px;
-        }
-
-        .btn-gradient:hover {
-            filter: brightness(1.03);
-            transform: translateY(-1px);
-        }
-
-        .btn-soft {
-            background: rgba(15, 23, 42, 0.05);
-            border: 1px solid rgba(2, 6, 23, 0.08);
-            color: #0f172a;
-            border-radius: 12px;
-        }
-
-        .btn-outline-danger {
-            border-radius: 12px;
-        }
-
-        .btn-outline-danger:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn:focus-visible,
-        .nav-pill:focus-visible,
-        .btn-close:focus-visible,
-        .navbar-toggler:focus-visible {
-            outline: 3px solid rgba(37, 99, 235, 0.35);
-            outline-offset: 2px;
-            box-shadow: none;
-        }
-
-        .alert {
-            border-radius: 14px;
-            border: 1px solid rgba(2, 6, 23, 0.06);
-            box-shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
-        }
-
-        .alert-success {
-            border-left: 4px solid #22c55e;
-        }
-
-        .alert-danger {
-            border-left: 4px solid #ef4444;
-        }
-
-        .table-modern {
-            margin: 0;
-        }
-
-        .table-modern thead th {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            border-bottom: 1px solid rgba(2, 6, 23, 0.08) !important;
-            padding-top: 0.85rem;
-            padding-bottom: 0.85rem;
-            background: rgba(15, 23, 42, 0.02);
-        }
-
-        .table-modern tbody td {
-            vertical-align: middle;
-            padding-top: 0.9rem;
-            padding-bottom: 0.9rem;
-        }
-
-        .table-modern tbody tr {
-            transition: background 0.15s ease;
-        }
-
-        .table-modern tbody tr:hover {
-            background: rgba(37, 99, 235, 0.04);
-        }
-
-        .cell-clip {
-            max-width: 240px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .room-item {
-            border: 1px solid rgba(2, 6, 23, 0.06);
-            border-radius: 14px;
-            padding: 0.9rem 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .room-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 35px rgba(2, 6, 23, 0.10);
-        }
-
-        .muted {
-            color: var(--muted);
-        }
-    </style>
-</head>
-<body class="dashboard-shell">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light navbar-glass sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="dashboard.php">
-                <i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>
-                Réservation de Salles
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link nav-pill active" href="dashboard.php"><i class="fas fa-home me-2"></i>Tableau de bord</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-pill" href="reserve.php"><i class="fas fa-calendar-plus me-2"></i>Réserver</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-pill" href="schedule.php"><i class="fas fa-calendar-alt me-2"></i>Planning</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <span class="me-3 align-self-center muted">
-                        Bonjour, <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
-                    </span>
-                    <a href="../logout.php" class="btn btn-soft btn-sm"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a>
+    <!-- Messages d'alerte -->
+    <?php if ($message): ?>
+        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700"><?php echo $message; ?></p>
                 </div>
             </div>
         </div>
-    </nav>
+    <?php endif; ?>
 
-    <div class="container py-4 py-lg-5">
-        <div class="hero p-4 p-lg-5 mb-4 mb-lg-5">
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <div class="hero-badge mb-3">
-                        <i class="fas fa-sparkles" style="color: var(--primary);"></i>
-                        Tableau de bord
-                    </div>
-                    <h1 class="hero-title h2 h1-lg mb-2">
-                        Bienvenue, <span style="color: var(--primary);"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    </h1>
-                    <p class="mb-0 muted">
-                        Gérez vos réservations, planifiez vos prochaines réunions et gardez une vue claire sur votre agenda.
+    <?php if ($error): ?>
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700"><?php echo $error; ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Quick Actions -->
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="reserve.php" class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+                <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Nouvelle réservation</h3>
+                    <p class="mt-1 text-sm text-gray-500">Réserver une salle de réunion</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="schedule.php" class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+                <div class="bg-green-100 p-3 rounded-lg mr-4">
+                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Voir le planning</h3>
+                    <p class="mt-1 text-sm text-gray-500">Consulter les disponibilités</p>
+                </div>
+            </div>
+        </a>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="bg-purple-100 p-3 rounded-lg mr-4">
+                    <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Prochaine réunion</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        <?php 
+                        $next_meeting = $reservations[0] ?? null;
+                        if ($next_meeting) {
+                            $date = new DateTime($next_meeting['reservation_date']);
+                            echo 'Le ' . $date->format('d/m/Y') . ' à ' . substr($next_meeting['start_time'], 0, 5);
+                        } else {
+                            echo 'Aucune réunion à venir';
+                        }
+                        ?>
                     </p>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <div class="d-flex flex-column flex-sm-row justify-content-lg-end gap-2">
-                        <a href="reserve.php" class="btn btn-gradient">
-                            <i class="fas fa-calendar-plus me-2"></i>
-                            Nouvelle réservation
-                        </a>
-                        <a href="schedule.php" class="btn btn-soft">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            Voir planning
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
-        
-        <?php if ($message): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($message); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($error); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-        
-        <div class="row g-4">
-            <div class="col-12">
-                <div class="card e-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="hero-badge">
-                                <i class="fas fa-history" style="color: var(--primary);"></i>
-                                Vos réservations
-                            </span>
-                        </div>
-                        <a href="reserve.php" class="btn btn-sm btn-gradient">
-                            <i class="fas fa-plus me-2"></i>
-                            Ajouter
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <?php if (isset($reservations) && count($reservations) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-modern table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Salle</th>
-                                        <th>Date</th>
-                                        <th>Heures</th>
-                                        <th>Objectif</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($reservations as $reservation): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="fw-bold">
-                                                <?php echo htmlspecialchars($reservation['room_name']); ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="muted">
-                                                <?php echo formatDate($reservation['reservation_date']); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark border" style="border-color: rgba(2, 6, 23, 0.10) !important;">
-                                                <i class="far fa-clock me-1" style="color: var(--primary);"></i>
-                                                <?php echo substr($reservation['start_time'], 0, 5); ?> - <?php echo substr($reservation['end_time'], 0, 5); ?>
-                                            </span>
-                                        </td>
-                                        <td class="cell-clip" title="<?php echo htmlspecialchars($reservation['purpose']); ?>">
-                                            <?php echo htmlspecialchars($reservation['purpose']); ?>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <a href="edit_reservation.php?id=<?php echo $reservation['id']; ?>" class="btn btn-sm btn-soft">
-                                                    <i class="fas fa-edit me-1" style="color: #f59e0b;"></i>
-                                                    Modifier
-                                                </a>
-                                                <a href="cancel_reservation.php?id=<?php echo $reservation['id']; ?>" 
-                                               class="btn btn-sm btn-outline-danger" 
-                                               onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
-                                                    <i class="fas fa-times me-1"></i>
-                                                    Annuler
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php else: ?>
-                        <div class="p-4 rounded-3" style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(2, 6, 23, 0.06);">
-                            <div class="d-flex align-items-start gap-3">
-                                <div class="flex-shrink-0">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(37, 99, 235, 0.12);">
-                                        <i class="fas fa-info" style="color: var(--primary);"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="fw-bold mb-1">Aucune réservation pour le moment</div>
-                                    <div class="muted mb-3">Créez votre première réservation en quelques clics.</div>
-                                    <a href="reserve.php" class="btn btn-gradient btn-sm">
-                                        <i class="fas fa-calendar-plus me-2"></i>
-                                        Réserver une salle
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="bg-amber-100 p-3 rounded-lg mr-4">
+                    <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Total des réservations</h3>
+                    <p class="mt-1 text-sm text-gray-500"><?php echo count($reservations); ?> réservation(s)</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <!-- Liste des réservations -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900 flex items-center">
+                <svg class="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Mes réservations
+            </h2>
+        </div>
+        
+        <?php if (isset($reservations) && count($reservations) > 0): ?>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Salle
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Heure
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Objectif
+                            </th>
+                            <th scope="col" class="relative px-6 py-3">
+                                <span class="sr-only">Actions</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($reservations as $reservation): 
+                            $reservation_date = new DateTime($reservation['reservation_date']);
+                            $start_time = new DateTime($reservation['start_time']);
+                            $end_time = new DateTime($reservation['end_time']);
+                            $interval = $start_time->diff($end_time);
+                            $now = new DateTime();
+                            $is_past = ($reservation_date < $now->setTime(0, 0, 0));
+                            $is_today = ($reservation_date->format('Y-m-d') === $now->format('Y-m-d'));
+                            $status_class = $is_past ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800';
+                            $status_text = $is_past ? 'Terminée' : ($is_today ? 'Aujourd\'hui' : 'À venir');
+                        ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($reservation['room_name']); ?></div>
+                                            <div class="text-sm text-gray-500"><?php echo $reservation['purpose']; ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900"><?php echo $reservation_date->format('d/m/Y'); ?></div>
+                                    <div class="text-sm text-gray-500"><?php echo ucfirst(strftime('%A', $reservation_date->getTimestamp())); ?></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        <?php echo $start_time->format('H:i'); ?> - <?php echo $end_time->format('H:i'); ?>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        <?php 
+                                        $hours = floor($interval->h + ($interval->i / 60));
+                                        $minutes = $interval->i % 60;
+                                        echo $hours . 'h' . ($minutes > 0 ? $minutes : '');
+                                        ?>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($reservation['purpose']); ?></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <?php if (!$is_past): ?>
+                                        <a href="edit_reservation.php?id=<?php echo $reservation['id']; ?>" class="text-blue-600 hover:text-blue-900 mr-3">Modifier</a>
+                                        <a href="cancel_reservation.php?id=<?php echo $reservation['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">Annuler</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="bg-white px-4 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune réservation</h3>
+                <p class="mt-1 text-sm text-gray-500">Vous n'avez encore effectué aucune réservation.</p>
+                <div class="mt-6">
+                    <a href="reserve.php" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Nouvelle réservation
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</main>
+
+<?php require_once '../includes/footer.php'; ?>
+
+<script>
+// Confirmation de suppression
+function confirmDelete() {
+    return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');
+}
+</script>

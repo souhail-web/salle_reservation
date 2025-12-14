@@ -22,6 +22,8 @@ if (isset($_POST['add_room'])) {
     
     if (empty($name) || $capacity <= 0) {
         $error = 'Veuillez remplir tous les champs obligatoires.';
+    } elseif ($capacity > 40) {
+        $error = 'La capacité maximale est de 40 personnes.';
     } else {
         try {
             $stmt = $pdo->prepare("INSERT INTO rooms (name, capacity, equipment) VALUES (?, ?, ?)");
@@ -42,6 +44,8 @@ if (isset($_POST['update_room'])) {
     
     if (empty($name) || $capacity <= 0) {
         $error = 'Veuillez remplir tous les champs obligatoires.';
+    } elseif ($capacity > 40) {
+        $error = 'La capacité maximale est de 40 personnes.';
     } else {
         try {
             $stmt = $pdo->prepare("UPDATE rooms SET name = ?, capacity = ?, equipment = ? WHERE id = ?");
@@ -196,7 +200,9 @@ try {
                         </div>
                         <div class="mb-3">
                             <label for="capacity" class="form-label">Capacité (nombre de personnes) *</label>
-                            <input type="number" class="form-control" id="capacity" name="capacity" min="1" required>
+                            <input type="number" class="form-control" id="capacity" name="capacity" min="1" max="40" required
+                                   oninput="if(this.value > 40) { this.value = 40; alert('La capacité maximale est de 40 personnes.'); }">
+                            <div class="form-text">Capacité maximale : 40 personnes</div>
                         </div>
                         <div class="mb-3">
                             <label for="equipment" class="form-label">Équipements</label>
@@ -230,7 +236,9 @@ try {
                         </div>
                         <div class="mb-3">
                             <label for="edit_capacity" class="form-label">Capacité (nombre de personnes) *</label>
-                            <input type="number" class="form-control" id="edit_capacity" name="capacity" min="1" required>
+                            <input type="number" class="form-control" id="edit_capacity" name="capacity" min="1" max="40" required
+                                   oninput="if(this.value > 40) { this.value = 40; alert('La capacité maximale est de 40 personnes.'); }">
+                            <div class="form-text">Capacité maximale : 40 personnes</div>
                         </div>
                         <div class="mb-3">
                             <label for="edit_equipment" class="form-label">Équipements</label>

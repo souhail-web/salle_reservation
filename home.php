@@ -30,12 +30,15 @@ try {
             $features = ['Wifi', 'Climatisation'];
         }
 
-        if ($capacity >= 80) {
-            $description = 'Grand espace adapté aux conférences et présentations, avec des équipements pour vos événements.';
-        } elseif ($capacity >= 25) {
-            $description = 'Salle spacieuse idéale pour des réunions d\'équipe, formations et ateliers collaboratifs.';
+        // Limiter la capacité à 40 personnes maximum
+        $display_capacity = min($capacity, 40);
+        
+        if ($display_capacity >= 30) {
+            $description = 'Grand espace adapté aux conférences et présentations, avec des équipements pour vos événements (jusqu\'à 40 personnes).';
+        } elseif ($display_capacity >= 15) {
+            $description = 'Salle spacieuse idéale pour des réunions d\'équipe, formations et ateliers collaboratifs (jusqu\'à 30 personnes).';
         } else {
-            $description = 'Salle confortable pour vos réunions et rendez-vous professionnels.';
+            $description = 'Salle confortable pour vos réunions et rendez-vous professionnels (jusqu\'à 15 personnes).';
         }
 
         $price = round(49.99 + max(0, $capacity) * 5, 2);
@@ -46,7 +49,7 @@ try {
             'name' => $name,
             'description' => $description,
             'price' => $price,
-            'capacity' => $capacity,
+            'capacity' => min($capacity, 40), // Limiter à 40 personnes maximum
             'image' => $image,
             'features' => $features,
         ];
@@ -657,7 +660,7 @@ body {
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
                                     </svg>
-                                    <span>Jusqu'à <?php echo $room['capacity']; ?> personnes</span>
+                                    <span>Jusqu'à <?php echo min($room['capacity'], 40); ?> personnes</span>
                                 </div>
                             </div>
                         </div>
